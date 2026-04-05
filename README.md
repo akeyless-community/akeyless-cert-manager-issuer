@@ -1,6 +1,8 @@
 # akeyless-cert-manager-issuer
 
-Home: **[github.com/akeyless-community/akeyless-cert-manager-issuer](https://github.com/akeyless-community/akeyless-cert-manager-issuer)** (create the empty repo in the org, then push — see below).
+Repository: **[github.com/akeyless-community/akeyless-cert-manager-issuer](https://github.com/akeyless-community/akeyless-cert-manager-issuer)**.
+
+If you truly need the repo name `akeyless-cermanager`, create that name on GitHub instead, then set `go.mod`’s first line to `module github.com/akeyless-community/akeyless-cermanager` and replace all import paths accordingly — the code here assumes **`akeyless-cert-manager-issuer`** (matches the project and avoids the typo “cermanager”).
 
 External [**cert-manager**](https://cert-manager.io/) issuer for [**Akeyless**](https://www.akeyless.io/) PKI (Certificate Issuer / Get PKI Certificate API). Implements `AkeylessIssuer` and `AkeylessClusterIssuer` and signs `CertificateRequest` resources using the Akeyless Go SDK.
 
@@ -65,6 +67,22 @@ The cert-manager project maintains a **public table of external issuers** on the
 4. In the PR description, note that the issuer **honours CertificateRequest approval** (same model as other issuer-lib-based issuers).
 
 Maintainers may adjust tier criteria over time; see the **Issuer Tier system** section on the same documentation page.
+
+## Push this tree to GitHub (`akeyless-community`)
+
+Git is already initialized with `main` and an initial commit in this directory.
+
+1. In the [Akeyless Community](https://github.com/orgs/akeyless-community) org, click **New repository**.
+2. Name it **`akeyless-cert-manager-issuer`**, leave it **empty** (no README, no `.gitignore`, no license — this tree already has them).
+3. Add the remote and push:
+
+```bash
+cd /path/to/akeyless-cert-manager-issuer
+git remote add origin https://github.com/akeyless-community/akeyless-cert-manager-issuer.git
+git push -u origin main
+```
+
+Use SSH if you prefer: `git@github.com:akeyless-community/akeyless-cert-manager-issuer.git`.
 
 ## Contributing
 
