@@ -1,0 +1,19 @@
+# Track B (public CA / ZeroSSL) — copy to 04-certificate-public.yaml and edit YOUR_PUBLIC_FQDN.
+# The FQDN must be a name your Public CA integration can issue for (real DNS you control).
+# Example: demo-k8s-e2e.prod.example.com
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo-tls-public
+  namespace: akeyless-cert-test
+spec:
+  secretName: demo-tls-public
+  duration: 720h
+  renewBefore: 240h
+  commonName: YOUR_PUBLIC_FQDN
+  dnsNames:
+    - YOUR_PUBLIC_FQDN
+  issuerRef:
+    group: certmanager.akeyless.io
+    kind: AkeylessIssuer
+    name: akeyless-pki-public

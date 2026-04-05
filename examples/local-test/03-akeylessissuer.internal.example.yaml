@@ -1,0 +1,15 @@
+# Track A — internal / private PKI (pairs with 04-certificate.yaml).
+# 1) Create PKI Certificate Issuer in Akeyless at certIssuerName below (see ENVIRONMENT-RECHECK.md).
+# 2) Replace apiUrl with your gateway v2 base URL.
+apiVersion: certmanager.akeyless.io/v1alpha1
+kind: AkeylessIssuer
+metadata:
+  name: akeyless-pki
+  namespace: akeyless-cert-test
+spec:
+  apiUrl: "https://YOUR_GW_HOST:PORT/v2"
+  certIssuerName: "/Labs/k8s-e2e-internal-ca"
+  auth:
+    accessKey:
+      secretRef:
+        name: akeyless-api-key

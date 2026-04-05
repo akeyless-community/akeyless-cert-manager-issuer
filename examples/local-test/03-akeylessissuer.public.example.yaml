@@ -1,0 +1,14 @@
+# Track B — Public CA (ZeroSSL) via Akeyless (pairs with 04-certificate.public-dns.example.yaml).
+# certIssuerName must be the exact path of your ZeroSSL-backed PKI issuer in Akeyless.
+apiVersion: certmanager.akeyless.io/v1alpha1
+kind: AkeylessIssuer
+metadata:
+  name: akeyless-pki-public
+  namespace: akeyless-cert-test
+spec:
+  apiUrl: "https://YOUR_GW_HOST:PORT/v2"
+  certIssuerName: "/public-ca/zerossl/zerossl"
+  auth:
+    accessKey:
+      secretRef:
+        name: akeyless-api-key

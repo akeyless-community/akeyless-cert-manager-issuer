@@ -1,0 +1,29 @@
+# Minimal CRD for local testing. For production, generate strict OpenAPI from kubebuilder/controller-gen.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: akeylessissuers.certmanager.akeyless.io
+spec:
+  group: certmanager.akeyless.io
+  names:
+    kind: AkeylessIssuer
+    listKind: AkeylessIssuerList
+    plural: akeylessissuers
+    singular: akeylessissuer
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+      subresources:
+        status: {}

@@ -1,0 +1,19 @@
+# Matches Track A (internal / private PKI) in docs/ENVIRONMENT-RECHECK.md
+# CSR will request CN + SAN: demo-tls.akeyless-cert-test.svc.cluster.local
+# Configure your Akeyless PKI issuer to permit that name (or use an unrestricted internal CA).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo-tls
+  namespace: akeyless-cert-test
+spec:
+  secretName: demo-tls
+  duration: 24h
+  renewBefore: 8h
+  commonName: demo-tls.akeyless-cert-test.svc.cluster.local
+  dnsNames:
+    - demo-tls.akeyless-cert-test.svc.cluster.local
+  issuerRef:
+    group: certmanager.akeyless.io
+    kind: AkeylessIssuer
+    name: akeyless-pki

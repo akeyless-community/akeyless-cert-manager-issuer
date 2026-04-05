@@ -1,0 +1,58 @@
+# Run the controller locally with KUBECONFIG; this SA is optional if you use your user + admin cluster.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: akeyless-cert-manager-issuer
+  namespace: akeyless-cert-test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: akeyless-cert-manager-issuer-local
+rules:
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificaterequests"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificaterequests/status"]
+    verbs: ["patch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["certificatesigningrequests"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["certificatesigningrequests/status"]
+    verbs: ["patch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resourceNames:
+      - "akeylessclusterissuers.certmanager.akeyless.io/*"
+      - "akeylessissuers.certmanager.akeyless.io/*"
+    resources: ["signers"]
+    verbs: ["sign"]
+  - apiGroups: ["certmanager.akeyless.io"]
+    resources: ["akeylessclusterissuers", "akeylessissuers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["certmanager.akeyless.io"]
+    resources: ["akeylessclusterissuers/status", "akeylessissuers/status"]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: akeyless-cert-manager-issuer-local
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: akeyless-cert-manager-issuer-local
+subjects:
+  - kind: ServiceAccount
+    name: akeyless-cert-manager-issuer
+    namespace: akeyless-cert-test

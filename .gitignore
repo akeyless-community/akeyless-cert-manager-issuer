@@ -1,0 +1,25 @@
+# Binaries
+/bin/
+/dist/
+*.exe
+akeyless-cert-manager-issuer
+
+# Go
+coverage.out
+*.test
+/vendor/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local env (never commit secrets)
+.env
+.env.*
+*.local.yaml
+/tmp/
+
+# Delve
+dlv
