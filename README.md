@@ -2,8 +2,6 @@
 
 Repository: **[github.com/akeyless-community/akeyless-cert-manager-issuer](https://github.com/akeyless-community/akeyless-cert-manager-issuer)**.
 
-If you truly need the repo name `akeyless-cermanager`, create that name on GitHub instead, then set `go.mod`’s first line to `module github.com/akeyless-community/akeyless-cermanager` and replace all import paths accordingly — the code here assumes **`akeyless-cert-manager-issuer`** (matches the project and avoids the typo “cermanager”).
-
 External [**cert-manager**](https://cert-manager.io/) issuer for [**Akeyless**](https://www.akeyless.io/) PKI (Certificate Issuer / Get PKI Certificate API). Implements `AkeylessIssuer` and `AkeylessClusterIssuer` and signs `CertificateRequest` resources using the Akeyless Go SDK.
 
 ## Features
