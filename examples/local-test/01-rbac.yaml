@@ -1,4 +1,4 @@
-# Run the controller locally with KUBECONFIG; this SA is optional if you use your user + admin cluster.
+# Local development RBAC. For production, use deploy/production/.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -23,10 +23,10 @@ rules:
     resources: ["certificatesigningrequests/status"]
     verbs: ["patch"]
   - apiGroups: ["certificates.k8s.io"]
+    resources: ["signers"]
     resourceNames:
       - "akeylessclusterissuers.certmanager.akeyless.io/*"
       - "akeylessissuers.certmanager.akeyless.io/*"
-    resources: ["signers"]
     verbs: ["sign"]
   - apiGroups: ["certmanager.akeyless.io"]
     resources: ["akeylessclusterissuers", "akeylessissuers"]
@@ -37,7 +37,7 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["events.k8s.io"]
+  - apiGroups: ["", "events.k8s.io"]
     resources: ["events"]
     verbs: ["create", "patch"]
   - apiGroups: ["coordination.k8s.io"]

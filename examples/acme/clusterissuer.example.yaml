@@ -1,0 +1,29 @@
+# cert-manager built-in ACME issuer → Akeyless ACME Server (NOT AkeylessIssuer / this controller).
+# Docs: https://docs.akeyless.io/docs/acme-server
+#       https://cert-manager.io/docs/configuration/acme/
+#
+# Before apply:
+#   1) PKI Cert Issuer with --enable-acme true and allowed-domains including your Certificate DNS names
+#   2) akeyless generate-acme-eab --cert-issuer-name <pki-issuer-path>
+#   3) Secret with EAB mac_key (see docs/ACME.md)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: akeyless-acme
+spec:
+  acme:
+    email: you@example.com
+  # Directory from Akeyless: https://<GW>:<port>/acme/<issuer-display-id>/directory
+    server: https://YOUR_GW_HOST:8000/acme/YOUR_ISSUER_DISPLAY_ID/directory
+    privateKeySecretRef:
+      name: akeyless-acme-account-key
+    externalAccountBinding:
+      keyID: YOUR_EAB_KID
+      keySecretRef:
+        name: akeyless-acme-eab
+        key: secret
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+  # If the gateway TLS cert is not publicly trusted, add caBundle (base64 PEM) here.

@@ -17,7 +17,7 @@ type AkeylessIssuer struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   AkeylessIssuerSpec       `json:"spec,omitempty"`
-	Status issuerv1alpha1.IssuerStatus `json:"status,omitzero"`
+	Status issuerv1alpha1.IssuerStatus `json:"status,omitempty"`
 }
 
 func (a *AkeylessIssuer) GetConditions() []metav1.Condition {

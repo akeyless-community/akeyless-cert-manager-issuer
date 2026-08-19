@@ -125,6 +125,8 @@ kubectl apply -f examples/local-test/01-rbac.yaml
 
 If the controller runs **in-cluster** under a `ServiceAccount`, bind that SA to the role instead of the example namespace.
 
+For the packaged production install in this repo, use `deploy/production/install.yaml` (or `deploy/production/base/`) instead of the local-test RBAC example.
+
 ### 5. Credential Secrets and `AkeylessIssuer`
 
 - Create the Secret(s) required for your chosen auth method (see [Authentication methods](#authentication-methods) below).
@@ -156,7 +158,7 @@ kubectl apply -f /tmp/03-issuer-public.yaml
 
 ### 6. Run the issuer controller
 
-**In-cluster (recommended for production):** deploy a `Deployment` that runs the controller image with your SA; enable leader election (default). Ensure `Lease` RBAC exists in the **leader election namespace** (usually the pod namespace).
+**In-cluster (recommended for production):** this repo now includes `deploy/production/install.yaml` and `deploy/production/base/` for a production-style `Deployment`. It enables leader election and sets both `--leader-election-namespace` and `--cluster-resource-namespace` to the controller pod namespace.
 
 **Local (kubeconfig on your machine):**
 
@@ -452,8 +454,8 @@ After each method change, watch **`AkeylessIssuer` Ready** and a **full certific
 | `api/v1alpha1/auth_types.go` | Auth field definitions |
 | `controller/auth.go` | Auth body construction |
 | `internal/akeylessapi/` | `/auth` and `/get-pki-certificate` client |
-| `README.md` | Overview, build, and how to propose listing on [cert-manager.io](https://cert-manager.io/docs/configuration/external/) |
+| `README.md` | Overview, production install, and release/build entry points |
 
 For Akeyless-side setup (K8s auth method, PKI issuers, public CA constraints), use [Akeyless documentation](https://docs.akeyless.io/).
 
-To **publish the project** (git hygiene, license, listing in the upstream issuer table), follow the **Listing on cert-manager.io** section in the repo [`README.md`](../README.md).
+To publish the project, keep the repository docs, license, and release process in sync with the production install assets in this repo.

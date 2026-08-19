@@ -1,0 +1,16 @@
+# Certificate using cert-manager ACME → Akeyless ACME Server.
+# DNS name must appear on the Akeyless PKI issuer allowed-domains list.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: acme-via-akeyless
+  namespace: default
+spec:
+  secretName: acme-via-akeyless-tls
+  commonName: YOUR_ALLOWED_FQDN
+  dnsNames:
+    - YOUR_ALLOWED_FQDN
+  issuerRef:
+    name: akeyless-acme
+    kind: ClusterIssuer
+    group: cert-manager.io

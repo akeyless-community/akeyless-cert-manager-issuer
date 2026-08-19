@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: akeyless-cert-manager-system
+  labels:
+    app.kubernetes.io/name: akeyless-cert-manager-issuer
+    app.kubernetes.io/component: controller
