@@ -81,22 +81,6 @@ docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.0 -
 
 [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for copyright.
 
-## Push this tree to GitHub (`akeyless-community`)
-
-Git is already initialized with `main` and an initial commit in this directory.
-
-1. In the [Akeyless Community](https://github.com/orgs/akeyless-community) org, click **New repository**.
-2. Name it **`akeyless-cert-manager-issuer`**, leave it **empty** (no README, no `.gitignore`, no license — this tree already has them).
-3. Add the remote and push:
-
-```bash
-cd /path/to/akeyless-cert-manager-issuer
-git remote add origin https://github.com/akeyless-community/akeyless-cert-manager-issuer.git
-git push -u origin main
-```
-
-Use SSH if you prefer: `git@github.com:akeyless-community/akeyless-cert-manager-issuer.git`.
-
 ## Contributing
 
 Issues and PRs are welcome. For large changes, open an issue first to agree on approach.
