@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
+	akeylessv1alpha1 "github.com/akeyless-community/akeyless-cert-manager-issuer/api/v1alpha1"
+	"github.com/akeyless-community/akeyless-cert-manager-issuer/internal/akeylessapi"
+	"github.com/cert-manager/cert-manager/pkg/util/pki"
 	issuerv1alpha1 "github.com/cert-manager/issuer-lib/api/v1alpha1"
 	"github.com/cert-manager/issuer-lib/controllers"
 	"github.com/cert-manager/issuer-lib/controllers/signer"
-	"github.com/cert-manager/cert-manager/pkg/util/pki"
-	akeylessv1alpha1 "github.com/akeyless-community/akeyless-cert-manager-issuer/api/v1alpha1"
-	"github.com/akeyless-community/akeyless-cert-manager-issuer/internal/akeylessapi"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -91,8 +91,17 @@ func (s *Signer) Sign(ctx context.Context, cr signer.CertificateRequestObject, i
 	}
 	eku := extKeyUsageCSV(details.ExtKeyUsage)
 
-	leaf, parent, err := akeylessapi.IssueFromCSR(ctx, spec.APIURL, token, spec.CertIssuerName, details.CSR, ttl, eku)
+	opts, err := issueOptionsFromSpec(spec)
 	if err != nil {
+		return signer.PEMBundle{}, signer.PermanentError{Err: err}
+	}
+
+	leaf, parent, err := akeylessapi.IssueFromCSR(ctx, spec.APIURL, token, spec.CertIssuerName, details.CSR, ttl, eku, opts)
+	if err != nil {
+		if akeylessapi.IsPermanent(err) {
+			return signer.PEMBundle{}, signer.PermanentError{Err: err}
+		}
+		// Pending / transient errors remain retryable for issuer-lib (within --max-retry-duration).
 		return signer.PEMBundle{}, err
 	}
 
@@ -110,6 +119,25 @@ func (s *Signer) Sign(ctx context.Context, cr signer.CertificateRequestObject, i
 		ChainPEM: []byte(chain),
 		CAPEM:    caPEM,
 	}), nil
+}
+
+func issueOptionsFromSpec(spec akeylessv1alpha1.AkeylessIssuerSpec) (akeylessapi.IssueOptions, error) {
+	opts := akeylessapi.IssueOptions{AsyncIssuance: spec.AsyncIssuance}
+	if spec.RequestTimeout != "" {
+		d, err := time.ParseDuration(spec.RequestTimeout)
+		if err != nil {
+			return opts, fmt.Errorf("spec.requestTimeout: %w", err)
+		}
+		opts.RequestTimeout = d
+	}
+	if spec.IssuanceTimeout != "" {
+		d, err := time.ParseDuration(spec.IssuanceTimeout)
+		if err != nil {
+			return opts, fmt.Errorf("spec.issuanceTimeout: %w", err)
+		}
+		opts.IssuanceTimeout = d
+	}
+	return opts, nil
 }
 
 func (s *Signer) resolveIssuer(issuerObject issuerv1alpha1.Issuer) (spec akeylessv1alpha1.AkeylessIssuerSpec, secretNamespace string, err error) {

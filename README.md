@@ -9,6 +9,7 @@ External [**cert-manager**](https://cert-manager.io/) issuer for [**Akeyless**](
 - **PKCS#10 CSR** forwarded to Akeyless `/get-pki-certificate` with PEM encoding expected by the gateway.
 - **Authentication** to `/auth` (pick one per issuer): access key, Kubernetes, AWS IAM, Azure AD, GCP, Universal Identity, JWT; legacy `credentialsSecretRef` for access key only.
 - **issuer-lib** integration: issuer `Check` + `Sign`, approval-aware `CertificateRequest` reconciliation.
+- **Public CA / async issuance** (`spec.asyncIssuance`): wait/poll when the gateway returns before the PEM is ready (Let's Encrypt / ZeroSSL DNS can take minutes), and re-fetch an already-issued cert from Akeyless when possible.
 
 ## Documentation
 
@@ -22,6 +23,8 @@ This controller implements the **Akeyless REST API** (`/get-pki-certificate`). I
 If your PKI Cert Issuer has **[ACME Server](https://docs.akeyless.io/docs/acme-server)** enabled on the gateway, configure a standard cert-manager **`ClusterIssuer` with `spec.acme`** pointing at  
 `https://<gateway>/acme/<issuer-display-id>/directory` and **External Account Binding** — see [docs/ACME.md](docs/ACME.md).
 
+For **public CA via this controller** (ZeroSSL / Let's Encrypt-backed PKI issuers), set `spec.asyncIssuance: true` (and preferably `issuanceTimeout: "15m"`). Ensure controller `--max-retry-duration` is at least that long (default is **15m**). Rapid recreate of `Certificate` / `CertificateRequest` while ACME is running can race orders.
+
 ## Requirements
 
 - Kubernetes cluster with **cert-manager** installed.
@@ -33,8 +36,8 @@ If your PKI Cert Issuer has **[ACME Server](https://docs.akeyless.io/docs/acme-s
 Build and push a versioned image first:
 
 ```bash
-docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.0 --build-arg VERSION=v0.1.0 .
-docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.0
+docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.1 .
+docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1
 ```
 
 Then set that image in `deploy/production/base/deployment.yaml` or `deploy/production/install.yaml`, and install:
@@ -74,7 +77,7 @@ go build -buildvcs=false -o bin/controller ./cmd/controller/
 ## Build container
 
 ```bash
-docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.0 --build-arg VERSION=v0.1.0 .
+docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.1 .
 ```
 
 ## License

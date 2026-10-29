@@ -1,5 +1,6 @@
-# Track B — Public CA (ZeroSSL) via Akeyless (pairs with 04-certificate.public-dns.example.yaml).
-# certIssuerName must be the exact path of your ZeroSSL-backed PKI issuer in Akeyless.
+# Track B — Public CA (ZeroSSL / Let's Encrypt) via Akeyless (pairs with 04-certificate.public-dns.example.yaml).
+# certIssuerName must be the exact path of your public-CA-backed PKI issuer in Akeyless.
+# asyncIssuance waits/polls when the gateway returns before the PEM is ready (ACME/DNS can take minutes).
 apiVersion: certmanager.akeyless.io/v1alpha1
 kind: AkeylessIssuer
 metadata:
@@ -8,6 +9,9 @@ metadata:
 spec:
   apiUrl: "https://YOUR_GW_HOST:PORT/v2"
   certIssuerName: "/public-ca/zerossl/zerossl"
+  asyncIssuance: true
+  issuanceTimeout: "15m"
+  requestTimeout: "2m"
   auth:
     accessKey:
       secretRef:

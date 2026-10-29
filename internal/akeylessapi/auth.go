@@ -10,7 +10,7 @@ import (
 
 // Authenticate calls Akeyless /auth with the given body and returns the API token.
 func Authenticate(ctx context.Context, apiURL string, body akeyless.Auth) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, authTimeout)
+	ctx, cancel := context.WithTimeout(ctx, defaultRequestTimeout)
 	defer cancel()
 
 	client := akeyless.NewAPIClient(&akeyless.Configuration{

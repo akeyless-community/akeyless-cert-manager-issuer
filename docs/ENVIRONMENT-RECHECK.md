@@ -62,7 +62,7 @@ If you change the namespace, update **both** the `Certificate` namespace **and**
 
 ### Track B — steps in Akeyless (Public CA / ZeroSSL)
 
-1. Configure a **PKI Certificate Issuer** in Akeyless that uses **Public CA** / **ZeroSSL** (or your org’s equivalent), following [Akeyless documentation](https://docs.akeyless.io/).
+1. Configure a **PKI Certificate Issuer** in Akeyless that uses **Public CA** / **ZeroSSL** (or your org’s equivalent), following [Akeyless documentation](https://docs.akeyless.io/docs/ssh-and-pkitls-certificates).
 
 2. Complete any **ZeroSSL account / domain validation** steps so the CA will issue for your real zone (e.g. `example.com`).
 
@@ -71,6 +71,15 @@ If you change the namespace, update **both** the `Certificate` namespace **and**
 4. Copy `04-certificate.public-dns.example.yaml` to a working file, replace **`YOUR_PUBLIC_FQDN`** with a hostname under your approved zone (e.g. `demo-k8s-e2e.prod.example.com`). Use the **same** string for `commonName` and `dnsNames` unless you intend multiple SANs.
 
 5. Do **not** use Track B for `*.svc.cluster.local` — public CAs typically reject those (`certificate_unsupported_top_level_domain` or similar).
+
+6. **Async issuance (required for public CA with this controller):** set on the `AkeylessIssuer`:
+   - `spec.asyncIssuance: true`
+   - `spec.issuanceTimeout: "15m"` (optional; default becomes 15m when async is on)
+   - `spec.requestTimeout: "2m"` (optional per-HTTP-call timeout)
+
+   Public CA / ACME+DNS often completes **after** the first `/get-pki-certificate` response. With `asyncIssuance`, the controller waits/polls and tries to **re-fetch** an already-stored cert (via `get-certificate-value` / issuer destination path) instead of failing immediately. Without it, you can see the cert in Akeyless while Kubernetes stays `Ready=False`.
+
+7. Alternative for Let's Encrypt: use Akeyless **ACME Server** + cert-manager built-in `spec.acme` — see [ACME.md](ACME.md).
 
 ---
 
@@ -178,7 +187,7 @@ Useful flags (see `cmd/controller/main.go`):
 | `--cluster-resource-namespace` | Namespace where Secrets for **`AkeylessClusterIssuer`** live (required for cluster issuers when not inferred from the pod) |
 | `--metrics-bind-address` | Default `:8080` |
 | `--health-probe-bind-address` | Default `:8081` (local only; unrelated to Akeyless gateway port) |
-| `--max-retry-duration` | How long signing retries before marking the `CertificateRequest` failed |
+| `--max-retry-duration` | How long signing retries before marking the `CertificateRequest` failed (default **15m**; keep ≥ `spec.issuanceTimeout` when using `asyncIssuance`) |
 
 Build note: if the module is not in a git repo, use `-buildvcs=false` or `GOFLAGS=-buildvcs=false`.
 

@@ -55,6 +55,12 @@ spec:
                   e.g. https://gateway.example.com:8080/v2
                 minLength: 1
                 type: string
+              asyncIssuance:
+                description: |-
+                  AsyncIssuance enables wait/poll behavior for public CA issuers (Let's Encrypt, ZeroSSL, etc.)
+                  where /get-pki-certificate may return before the certificate PEM is ready. When true, Sign
+                  holds until the cert can be fetched or issuanceTimeout elapses, instead of failing immediately.
+                type: boolean
               auth:
                 description: |-
                   Auth configures how to call Akeyless /auth. Exactly one method must be set inside auth.
@@ -286,6 +292,18 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              issuanceTimeout:
+                description: |-
+                  IssuanceTimeout is the total wait budget for one Sign attempt including polls (e.g. "15m").
+                  Defaults to 2m, or 15m when asyncIssuance is true. Should be <= controller --max-retry-duration.
+                pattern: ^([0-9]+(\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$
+                type: string
+              requestTimeout:
+                description: |-
+                  RequestTimeout is the per-HTTP-call timeout for Akeyless API requests (Go duration, e.g. "2m").
+                  Defaults to 2m.
+                pattern: ^([0-9]+(\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$
+                type: string
             required:
             - apiUrl
             - certIssuerName

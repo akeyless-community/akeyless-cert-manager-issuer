@@ -15,6 +15,9 @@ metadata:
 spec:
   apiUrl: https://YOUR_GW_HOST:PORT/v2
   certIssuerName: /Path/To/CertIssuer
+  # For public CA (Let's Encrypt / ZeroSSL) issuers, enable:
+  # asyncIssuance: true
+  # issuanceTimeout: "15m"
   auth:
     accessKey:
       secretRef:

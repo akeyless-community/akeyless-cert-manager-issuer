@@ -65,3 +65,15 @@ You can run **both** patterns in one cluster:
 - **AkeylessIssuer** (this controller) → direct API issuance with richer Akeyless auth methods and without ACME challenge plumbing.
 
 They are complementary, not overlapping implementations.
+
+## Public CA via this controller (not ACME Server)
+
+If you use an Akeyless **PKI Cert Issuer** backed by a public CA (ZeroSSL / Let's Encrypt) **through this external issuer** (`/get-pki-certificate`), enable:
+
+```yaml
+spec:
+  asyncIssuance: true
+  issuanceTimeout: "15m"
+```
+
+That covers the case where the gateway starts ACME asynchronously and the first API response is empty/error while the certificate later appears in Akeyless. Prefer ACME Server (above) when you want cert-manager to own the ACME challenge flow end-to-end.

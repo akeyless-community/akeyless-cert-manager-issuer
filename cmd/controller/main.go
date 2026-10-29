@@ -43,7 +43,7 @@ func main() {
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address for health probes.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", true, "Enable leader election.")
 	flag.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace for Lease objects when running outside the cluster (required if --leader-elect=true locally). Ignored in-cluster.")
-	flag.DurationVar(&maxRetryDuration, "max-retry-duration", 2*time.Minute, "Max time to retry signing after CertificateRequest creation.")
+	flag.DurationVar(&maxRetryDuration, "max-retry-duration", 15*time.Minute, "Max time to retry signing after CertificateRequest creation. Use >= issuanceTimeout when AkeylessIssuer.spec.asyncIssuance is true (public CA).")
 	flag.StringVar(&clusterResourceNamespace, "cluster-resource-namespace", "", "Namespace where secrets for AkeylessClusterIssuer are stored (e.g. cert-manager).")
 	flag.Parse()
 

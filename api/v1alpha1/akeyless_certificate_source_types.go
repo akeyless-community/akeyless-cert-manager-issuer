@@ -21,4 +21,22 @@ type AkeylessIssuerSpec struct {
 	// Deprecated: prefer auth.accessKey.secretRef.
 	// +optional
 	CredentialsSecretRef *corev1.LocalObjectReference `json:"credentialsSecretRef,omitempty"`
+
+	// AsyncIssuance enables wait/poll behavior for public CA issuers (Let's Encrypt, ZeroSSL, etc.)
+	// where /get-pki-certificate may return before the certificate PEM is ready. When true, Sign
+	// holds until the cert can be fetched or issuanceTimeout elapses, instead of failing immediately.
+	// +optional
+	AsyncIssuance bool `json:"asyncIssuance,omitempty"`
+
+	// RequestTimeout is the per-HTTP-call timeout for Akeyless API requests (Go duration, e.g. "2m").
+	// Defaults to 2m.
+	// +optional
+	// +kubebuilder:validation:Pattern=`^([0-9]+(\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$`
+	RequestTimeout string `json:"requestTimeout,omitempty"`
+
+	// IssuanceTimeout is the total wait budget for one Sign attempt including polls (e.g. "15m").
+	// Defaults to 2m, or 15m when asyncIssuance is true. Should be <= controller --max-retry-duration.
+	// +optional
+	// +kubebuilder:validation:Pattern=`^([0-9]+(\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$`
+	IssuanceTimeout string `json:"issuanceTimeout,omitempty"`
 }
