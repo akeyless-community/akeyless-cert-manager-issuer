@@ -36,8 +36,8 @@ For **public CA via this controller** (ZeroSSL / Let's Encrypt-backed PKI issuer
 Build and push a versioned image first:
 
 ```bash
-docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.1 .
-docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1
+docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.2 .
+docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2
 ```
 
 Then set that image in `deploy/production/base/deployment.yaml` or `deploy/production/install.yaml`, and install:
