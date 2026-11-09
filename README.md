@@ -27,24 +27,74 @@ For **public CA via this controller** (ZeroSSL / Let's Encrypt-backed PKI issuer
 
 ## Requirements
 
-- Kubernetes cluster with **cert-manager** installed.
-- **Akeyless** gateway reachable from the controller (in-cluster `Deployment` or local `go run` with `KUBECONFIG`).
-- This repository’s **CRDs** applied (`deploy/crds/`).
+- Kubernetes cluster with **[cert-manager](https://cert-manager.io/docs/installation/)** installed.
+- **Akeyless** API reachable from the controller: Akeyless SaaS (`https://api.akeyless.io`) or your gateway.
 
-## Production install
+## Install
 
-Build and push a versioned image first:
-
-```bash
-docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.2 .
-docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2
-```
-
-Then set that image in `deploy/production/base/deployment.yaml` or `deploy/production/install.yaml`, and install:
+One command installs the CRDs, RBAC and the controller `Deployment` into the `akeyless-cert-manager-system` namespace, using the published image `ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2` (linux/amd64):
 
 ```bash
-kubectl apply -f deploy/production/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/akeyless-community/akeyless-cert-manager-issuer/v0.1.2/deploy/production/install.yaml
 ```
+
+To upgrade, re-apply the manifest of the new release, or switch only the image:
+
+```bash
+kubectl -n akeyless-cert-manager-system set image deploy/akeyless-cert-manager-issuer \
+  controller=ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2
+```
+
+All releases and their images are listed under [Releases](https://github.com/akeyless-community/akeyless-cert-manager-issuer/releases).
+
+## Usage
+
+1. **Credentials and issuer**: start from [`deploy/production/samples/issuer-accesskey.example.yaml`](deploy/production/samples/issuer-accesskey.example.yaml).
+   - `apiUrl`: `https://api.akeyless.io` for Akeyless SaaS, or `https://<gateway-host>:8000/api/v2` for a gateway.
+   - `certIssuerName`: the full path of your Akeyless PKI Certificate Issuer, e.g. `/Labs/my-internal-ca`.
+   - An `AkeylessClusterIssuer` reads its Secret from `akeyless-cert-manager-system`; an `AkeylessIssuer` reads it from its own namespace.
+   - Other auth methods (Kubernetes, AWS IAM, Azure AD, GCP, Universal Identity, JWT) are described in [docs/ENVIRONMENT-RECHECK.md](docs/ENVIRONMENT-RECHECK.md#authentication-methods).
+2. **Certificate**: create a cert-manager `Certificate` that points at the issuer:
+
+   ```yaml
+   issuerRef:
+     group: certmanager.akeyless.io
+     kind: AkeylessClusterIssuer   # or AkeylessIssuer
+     name: akeyless-pki
+   ```
+
+3. **Approval**: cert-manager does not approve `CertificateRequest`s for external issuers by default, so the `Certificate` stays pending until its request is approved. Either approve each request manually (`cmctl approve -n <namespace> <certificaterequest-name>`), or allow cert-manager to approve requests for Akeyless issuers automatically:
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRole
+   metadata:
+     name: cert-manager-approve-akeyless
+   rules:
+     - apiGroups: ["cert-manager.io"]
+       resources: ["signers"]
+       verbs: ["approve"]
+       resourceNames:
+         - "akeylessissuers.certmanager.akeyless.io/*"
+         - "akeylessclusterissuers.certmanager.akeyless.io/*"
+   ---
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRoleBinding
+   metadata:
+     name: cert-manager-approve-akeyless
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: cert-manager-approve-akeyless
+   subjects:
+     - kind: ServiceAccount
+       name: cert-manager        # cert-manager controller service account
+       namespace: cert-manager   # namespace cert-manager is installed in
+   ```
+
+   If you run [approver-policy](https://cert-manager.io/docs/policy/approval/approver-policy/), configure a `CertificateRequestPolicy` for these issuers instead.
+
+For a full end-to-end walkthrough (PKI issuer setup, DNS names, troubleshooting), see [docs/ENVIRONMENT-RECHECK.md](docs/ENVIRONMENT-RECHECK.md).
 
 Production assets included in this repo:
 
@@ -57,7 +107,7 @@ Production assets included in this repo:
 ## Quick start (development)
 
 ```bash
-kubectl apply -f deploy/crds/
+kubectl apply -f deploy/crds/   # CRDs only; the production install.yaml already includes them
 kubectl apply -f examples/local-test/00-namespace.yaml
 kubectl apply -f examples/local-test/01-rbac.yaml
 # Create Secret + AkeylessIssuer from examples (see docs/ENVIRONMENT-RECHECK.md)
@@ -74,11 +124,16 @@ For shared clusters, use the production manifests above: the controller runs as 
 go build -buildvcs=false -o bin/controller ./cmd/controller/
 ```
 
-## Build container
+## Build your own image
+
+Only needed if you change the code or publish a release; otherwise use the published image above. The binary is built for linux/amd64, so pass `--platform linux/amd64` (required on Apple Silicon so the image platform matches the binary):
 
 ```bash
-docker build -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.1 --build-arg VERSION=v0.1.1 .
+docker build --platform linux/amd64 -t ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2 --build-arg VERSION=v0.1.2 .
+docker push ghcr.io/akeyless-community/akeyless-cert-manager-issuer:v0.1.2
 ```
+
+For a custom image, set it in `deploy/production/base/deployment.yaml` or `deploy/production/install.yaml` before applying.
 
 ## License
 
